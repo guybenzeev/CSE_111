@@ -372,9 +372,279 @@ WHERE product_id IN (
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------
--- Statement 22: [Brief Title]
--- Explanation: [1 to 2 sentences explaining the complex query/trigger logic].
+-- Statement 22: Customers with Pending Orders (EXISTS)
+-- Explanation: Uses a correlated EXISTS subquery to retrieve customers who
+--              have at least one order that is still PENDING.
 -- ----------------------------------------------------------------------------
--- [Insert SQL Statement 22 Here];
+SELECT
+    c.customer_id,
+    c.name AS customer_name,
+    c.email
+FROM Customer AS c
+WHERE EXISTS (
+    SELECT 1
+    FROM Orders AS o
+    WHERE o.customer_id = c.customer_id
+        AND o.status = 'PENDING'
+)
+ORDER BY c.customer_id;
 
--- [Continue Statements 23 through 32...]
+-- ----------------------------------------------------------------------------
+-- Statement 23: Warehouses with No Upcoming Deliveries (NOT EXISTS)
+-- Explanation: Uses a correlated NOT EXISTS subquery to find warehouses that
+--              have no deliveries with a SCHEDULED status.
+-- ----------------------------------------------------------------------------
+SELECT
+    w.warehouse_id,
+    w.name AS warehouse_name,
+    w.city
+FROM Warehouse AS w
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM Delivery AS d
+    WHERE d.warehouse_id = w.warehouse_id
+        AND d.status = 'SCHEDULED'
+);
+
+-- ----------------------------------------------------------------------------
+-- Statement 24: Products Stocked in Merced but Not Ontario (EXCEPT)
+-- Explanation: Uses the EXCEPT set operator to return products stocked in
+--              warehouse 1 (Merced) that are not stocked in warehouse 3 (Ontario).
+-- ----------------------------------------------------------------------------
+SELECT p.product_id, p.sku, p.name AS product_name
+FROM Product AS p
+INNER JOIN ProductStock AS ps
+    ON p.product_id = ps.product_id
+WHERE ps.warehouse_id = 1
+EXCEPT
+SELECT p.product_id, p.sku, p.name AS product_name
+FROM Product AS p
+INNER JOIN ProductStock AS ps
+    ON p.product_id = ps.product_id
+WHERE ps.warehouse_id = 3
+ORDER BY 1;
+
+-- ----------------------------------------------------------------------------
+-- Statement 25: Products Stocked in Both Hayward and Ontario (INTERSECT)
+-- Explanation: Uses the INTERSECT set operator to return products stocked in
+--              both warehouse 2 (Hayward) and warehouse 3 (Ontario).
+-- ----------------------------------------------------------------------------
+SELECT p.product_id, p.sku, p.name AS product_name
+FROM Product AS p
+INNER JOIN ProductStock AS ps
+    ON p.product_id = ps.product_id
+WHERE ps.warehouse_id = 2
+INTERSECT
+SELECT p.product_id, p.sku, p.name AS product_name
+FROM Product AS p
+INNER JOIN ProductStock AS ps
+    ON p.product_id = ps.product_id
+WHERE ps.warehouse_id = 3
+ORDER BY 1;
+
+-- ----------------------------------------------------------------------------
+-- Statement 26: Combined Contact Directory (UNION)
+-- Explanation: Uses UNION to combine supplier contacts and customers into one
+--              directory, with a label column identifying each contact's type.
+-- ----------------------------------------------------------------------------
+SELECT
+    s.name AS organization,
+    s.contact_name AS contact,
+    s.email,
+    s.phone,
+    'SUPPLIER' AS contact_type
+FROM Supplier AS s
+UNION
+SELECT
+    c.name AS organization,
+    c.name AS contact,
+    c.email,
+    c.phone,
+    'CUSTOMER' AS contact_type
+FROM Customer AS c
+ORDER BY contact_type, organization;
+
+-- ----------------------------------------------------------------------------
+-- Statement 27: Low-Stock Items with Cheapest Supplier (CTE)
+-- Explanation: A CTE finds the lowest supplier cost for each product, which is
+--              joined to low-stock rows to show which supplier to reorder from.
+-- ----------------------------------------------------------------------------
+WITH CheapestCost AS (
+    SELECT
+        product_id,
+        MIN(unit_cost) AS min_cost
+    FROM SupplierProduct
+    GROUP BY product_id
+)
+SELECT
+    w.name AS warehouse_name,
+    p.sku,
+    p.name AS product_name,
+    ps.quantity_on_hand,
+    ps.reorder_level,
+    s.name AS cheapest_supplier,
+    sp.unit_cost,
+    sp.lead_time_days
+FROM ProductStock AS ps
+INNER JOIN Warehouse AS w
+    ON ps.warehouse_id = w.warehouse_id
+INNER JOIN Product AS p
+    ON ps.product_id = p.product_id
+INNER JOIN CheapestCost AS cc
+    ON ps.product_id = cc.product_id
+INNER JOIN SupplierProduct AS sp
+    ON cc.product_id = sp.product_id
+    AND cc.min_cost = sp.unit_cost
+INNER JOIN Supplier AS s
+    ON sp.supplier_id = s.supplier_id
+WHERE ps.quantity_on_hand < ps.reorder_level
+ORDER BY w.name, p.name;
+
+-- ----------------------------------------------------------------------------
+-- Statement 28: Product Revenue Rank Within Category (DENSE_RANK)
+-- Explanation: Calculates total revenue for each product and uses DENSE_RANK
+--              partitioned by category to rank products within their category.
+-- ----------------------------------------------------------------------------
+SELECT
+    c.name AS category_name,
+    p.name AS product_name,
+    ROUND(SUM(oli.quantity * oli.unit_price), 2) AS product_revenue,
+    DENSE_RANK() OVER (
+        PARTITION BY p.category_id
+        ORDER BY SUM(oli.quantity * oli.unit_price) DESC
+    ) AS rank_in_category
+FROM Product AS p
+INNER JOIN Category AS c
+    ON p.category_id = c.category_id
+INNER JOIN OrderLineItem AS oli
+    ON p.product_id = oli.product_id
+GROUP BY p.category_id, c.name, p.product_id, p.name
+ORDER BY c.name, rank_in_category;
+
+-- ----------------------------------------------------------------------------
+-- Statement 29: Each Customer's Most Recent Order (ROW_NUMBER)
+-- Explanation: Numbers each customer's orders from newest to oldest using
+--              ROW_NUMBER, then keeps only the most recent order per customer.
+-- ----------------------------------------------------------------------------
+SELECT
+    customer_id,
+    customer_name,
+    order_id,
+    order_date,
+    status
+FROM (
+    SELECT
+        c.customer_id,
+        c.name AS customer_name,
+        o.order_id,
+        o.order_date,
+        o.status,
+        ROW_NUMBER() OVER (
+            PARTITION BY c.customer_id
+            ORDER BY o.order_date DESC
+        ) AS order_rank
+    FROM Customer AS c
+    INNER JOIN Orders AS o
+        ON c.customer_id = o.customer_id
+) AS ranked_orders
+WHERE order_rank = 1
+ORDER BY order_date DESC;
+
+-- ----------------------------------------------------------------------------
+-- Statement 30: Low-Stock Dashboard View (CREATE VIEW)
+-- Explanation: Creates a view listing every warehouse/product pair whose
+--              quantity on hand is below its reorder level.
+-- ----------------------------------------------------------------------------
+DROP VIEW IF EXISTS View_LowStock;
+
+CREATE VIEW View_LowStock AS
+SELECT
+    w.warehouse_id,
+    w.name AS warehouse_name,
+    p.product_id,
+    p.sku,
+    p.name AS product_name,
+    ps.quantity_on_hand,
+    ps.reorder_level,
+    ps.reorder_level - ps.quantity_on_hand AS units_short
+FROM ProductStock AS ps
+INNER JOIN Warehouse AS w
+    ON ps.warehouse_id = w.warehouse_id
+INNER JOIN Product AS p
+    ON ps.product_id = p.product_id
+WHERE ps.quantity_on_hand < ps.reorder_level;
+
+-- ----------------------------------------------------------------------------
+-- Statement 31: Query the Low-Stock View
+-- Explanation: Retrieves all rows from View_LowStock, showing the items with
+--              the lowest quantity on hand first.
+-- ----------------------------------------------------------------------------
+SELECT
+    warehouse_name,
+    sku,
+    product_name,
+    quantity_on_hand,
+    reorder_level,
+    units_short
+FROM View_LowStock
+ORDER BY quantity_on_hand ASC, units_short DESC;
+
+-- ----------------------------------------------------------------------------
+-- Statement 32: Receive Delivery Trigger (CREATE TRIGGER)
+-- Explanation: When a delivery's status changes to RECEIVED, this trigger adds
+--              a stock row for any new product, then adds each item's quantity.
+-- ----------------------------------------------------------------------------
+DROP TRIGGER IF EXISTS trg_ReceiveDelivery;
+
+CREATE TRIGGER trg_ReceiveDelivery
+AFTER UPDATE OF status ON Delivery
+FOR EACH ROW
+WHEN OLD.status <> 'RECEIVED' AND NEW.status = 'RECEIVED'
+BEGIN
+    INSERT OR IGNORE INTO ProductStock (warehouse_id, product_id, quantity_on_hand)
+    SELECT NEW.warehouse_id, di.product_id, 0
+    FROM DeliveryItem AS di
+    WHERE di.delivery_id = NEW.delivery_id;
+
+    UPDATE ProductStock
+    SET quantity_on_hand = quantity_on_hand + (
+        SELECT di.quantity
+        FROM DeliveryItem AS di
+        WHERE di.delivery_id = NEW.delivery_id
+            AND di.product_id = ProductStock.product_id
+    )
+    WHERE warehouse_id = NEW.warehouse_id
+        AND product_id IN (
+            SELECT di.product_id
+            FROM DeliveryItem AS di
+            WHERE di.delivery_id = NEW.delivery_id
+        );
+END;
+
+-- ----------------------------------------------------------------------------
+-- Statement 33: Receive Scheduled Delivery 13 (Fires Trigger)
+-- Explanation: Marks scheduled delivery 13 as RECEIVED, which fires the
+--              trigger from Statement 32 and restocks the Merced warehouse.
+-- ----------------------------------------------------------------------------
+UPDATE Delivery
+SET status = 'RECEIVED'
+WHERE delivery_id = 13;
+
+-- ----------------------------------------------------------------------------
+-- Statement 34: Order Status Breakdown per Warehouse (CASE Pivot)
+-- Explanation: Uses conditional CASE expressions to count each warehouse's
+--              orders by status, producing one column per status.
+-- ----------------------------------------------------------------------------
+SELECT
+    w.warehouse_id,
+    w.name AS warehouse_name,
+    COUNT(CASE WHEN o.status = 'PENDING' THEN 1 END) AS pending_orders,
+    COUNT(CASE WHEN o.status = 'SHIPPED' THEN 1 END) AS shipped_orders,
+    COUNT(CASE WHEN o.status = 'DELIVERED' THEN 1 END) AS delivered_orders,
+    COUNT(CASE WHEN o.status = 'CANCELLED' THEN 1 END) AS cancelled_orders,
+    COUNT(o.order_id) AS total_orders
+FROM Warehouse AS w
+LEFT JOIN Orders AS o
+    ON w.warehouse_id = o.warehouse_id
+GROUP BY w.warehouse_id, w.name
+ORDER BY w.warehouse_id;
