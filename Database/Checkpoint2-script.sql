@@ -19,42 +19,44 @@
 -- below. Each statement must sum to 100% across the 2 team members.
 --
 -- SECTION 1: SIMPLE STATEMENTS
--- Statement 01: [Member 1]: XX%, [Member 2]: XX%
--- Statement 02: [Member 1]: XX%, [Member 2]: XX%
--- Statement 03: [Member 1]: XX%, [Member 2]: XX%
--- Statement 04: [Member 1]: XX%, [Member 2]: XX%
--- Statement 05: [Member 1]: XX%, [Member 2]: XX%
--- Statement 06: [Member 1]: XX%, [Member 2]: XX%
--- Statement 07: [Member 1]: XX%, [Member 2]: XX%
--- Statement 08: [Member 1]: XX%, [Member 2]: XX%
--- Statement 09: [Member 1]: XX%, [Member 2]: XX%
--- Statement 10: [Member 1]: XX%, [Member 2]: XX%
+-- Statement 01: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 02: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 03: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 04: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 05: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 06: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 07: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 08: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 09: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 10: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
 --
 -- SECTION 2: INTERMEDIATE STATEMENTS
--- Statement 11: [Member 1]: XX%, [Member 2]: XX%
--- Statement 12: [Member 1]: XX%, [Member 2]: XX%
--- Statement 13: [Member 1]: XX%, [Member 2]: XX%
--- Statement 14: [Member 1]: XX%, [Member 2]: XX%
--- Statement 15: [Member 1]: XX%, [Member 2]: XX%
--- Statement 16: [Member 1]: XX%, [Member 2]: XX%
--- Statement 17: [Member 1]: XX%, [Member 2]: XX%
--- Statement 18: [Member 1]: XX%, [Member 2]: XX%
--- Statement 19: [Member 1]: XX%, [Member 2]: XX%
--- Statement 20: [Member 1]: XX%, [Member 2]: XX%
--- Statement 21: [Member 1]: XX%, [Member 2]: XX%
+-- Statement 11: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 12: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 13: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 14: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 15: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 16: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 17: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 18: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 19: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 20: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 21: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
 --
 -- SECTION 3: COMPLEX STATEMENTS
--- Statement 22: [Member 1]: XX%, [Member 2]: XX%
--- Statement 23: [Member 1]: XX%, [Member 2]: XX%
--- Statement 24: [Member 1]: XX%, [Member 2]: XX%
--- Statement 25: [Member 1]: XX%, [Member 2]: XX%
--- Statement 26: [Member 1]: XX%, [Member 2]: XX%
--- Statement 27: [Member 1]: XX%, [Member 2]: XX%
--- Statement 28: [Member 1]: XX%, [Member 2]: XX%
--- Statement 29: [Member 1]: XX%, [Member 2]: XX%
--- Statement 30: [Member 1]: XX%, [Member 2]: XX%
--- Statement 31: [Member 1]: XX%, [Member 2]: XX%
--- Statement 32: [Member 1]: XX%, [Member 2]: XX%
+-- Statement 22: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 23: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 24: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 25: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 26: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 27: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 28: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 29: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 30: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 31: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 32: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 33: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
+-- Statement 34: [Guy Ben Zeev]: 50%, [Vishwa Reddy]: 50%
 -- ============================================================================
 
 -- Ensure SQLite foreign key constraints are enforced
