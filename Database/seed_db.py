@@ -22,7 +22,7 @@ TABLES = [
 
 
 def main() -> None:
-    db_path = Path(sys.argv[1]) if len(sys.argv) > 1 else HERE / "stockflow.sqlite3"
+    db_path = Path(sys.argv[1]) if len(sys.argv) > 1 else HERE / "Checkpoint2-dbase.sqlite3"
 
     conn = sqlite3.connect(db_path)
     try:
